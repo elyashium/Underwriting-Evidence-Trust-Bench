@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+dist/
+coverage/
+
+# The reviewer log is local state, not source. It starts empty on purpose: an
+# agreement rate shipped in the repo would be a number with nobody behind it.
+data/reviews.json
+data/reviews.json.tmp
+
+.env
+.env.local
+*.log
+.DS_Store
