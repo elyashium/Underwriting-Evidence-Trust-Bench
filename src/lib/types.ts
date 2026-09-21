@@ -215,6 +215,7 @@ export type EngineId = 'reference' | 'naive' | 'external';
  * run, a hand-rolled script — graded by the adapter in `external.ts`. It never
  * has analyses computed here; the adapter synthesizes them from reported
  * findings plus this repo's own evidence groups.
+ */
 
 // ---------------------------------------------------------------------------
 // Ground truth

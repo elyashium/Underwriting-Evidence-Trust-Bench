@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
-import { GUIDELINES } from '@/lib/classify';
+import { GUIDELINES, analyzePacket } from '@/lib/classify';
+import { FAIL_001 } from '@/data/failures/FAIL-001';
 
 import { Badge, PageHead } from '../components/ui';
 
@@ -13,6 +14,11 @@ export const metadata = { title: 'Method' };
  * files and rules rather than describing an architecture in the abstract.
  */
 export default function MethodPage() {
+  const failure = analyzePacket(FAIL_001);
+  const failed = failure.findings.find(
+    (f) => f.groupKey === FAIL_001.groundTruth.focusGroup,
+  );
+
   return (
     <>
       <PageHead eyebrow="How it works and what it cannot tell you" title="Method">
@@ -387,6 +393,43 @@ export default function MethodPage() {
           A verdict of <em>can&rsquo;t tell</em> is counted and shown but kept out of the
           agreement denominator. It is not a vote against the pipeline; it says the packet
           did not give the reviewer enough to decide.
+        </p>
+      </section>
+
+      <section className="section">
+        <h2>One case it gets wrong</h2>
+        <p>
+          A scorecard that only contains wins is advertising. This packet is kept out
+          of the graded corpus precisely because the engine fails it — and it is
+          shown here with the mechanism named rather than buried.
+        </p>
+        <div className="card" style={{ marginTop: 12 }}>
+          <div className="eyebrow">FAIL-001 · {FAIL_001.title}</div>
+          <p className="small muted" style={{ marginTop: 8 }}>
+            {FAIL_001.synopsis}
+          </p>
+          <div className="row" style={{ marginTop: 6 }}>
+            <span className="faint small">engine says</span>
+            {failed ? <Badge of={failed.classification} /> : null}
+            <span className="faint small">human reading</span>
+            <Badge of={FAIL_001.groundTruth.expected[FAIL_001.groundTruth.focusGroup]} />
+          </div>
+          <p className="small" style={{ marginTop: 10, marginBottom: 0 }}>
+            {FAIL_001.groundTruth.why}
+          </p>
+          {failed ? (
+            <p className="small faint" style={{ marginTop: 8, marginBottom: 0 }}>
+              The engine&rsquo;s own rationale: {failed.rationale}
+            </p>
+          ) : null}
+        </div>
+        <p className="note">
+          The fixture lives in <span className="mono">src/data/failures/</span>, outside
+          the graded corpus, with a test pinning all three facts: it is not in the
+          corpus, the engine still flags it, and the human reading still disagrees.
+          If the classifier ever learns recency-with-corroboration and this packet
+          stops failing, the file gets deleted — a known-failure list that never
+          shrinks is a trophy shelf, not a measurement.
         </p>
       </section>
 

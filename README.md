@@ -34,6 +34,7 @@ npm run reset   # empty the reviewer log after a demo
 ```
 
 `npm run bench` exits non-zero if any taxonomy case fails, so it works as a CI gate.
+CI also runs `npm run bench:heldout` (60 generated packets the rules never saw).
 
 ---
 
@@ -64,6 +65,11 @@ someone about a packet where nothing is wrong.
 | `src/lib/link.ts` | Evidence groups: every value the packet has ever asserted for one (entity, field) pair, in arrival order |
 | `src/lib/classify.ts` | Adjudication, six derived cross-field rules, and the signal-weighted confidence |
 | `src/lib/naive.ts` | The baseline engine, for the ablation |
+| `src/lib/external.ts` | The adapter: grades findings reported by any outside system under the same two-way contract |
+| `src/lib/llm.ts` | An LLM adjudicator (same extractor/linker, model in place of the rules) — needs `GROQ_API_KEY`, never tested, only run |
+| `src/lib/ocr.ts` | Synthetic glyph-noise model for the stability script |
+| `src/data/heldout/` | 60 generated value-variant packets the rules never saw (6 per case, deterministic) |
+| `src/data/failures/` | FAIL-001: a packet the engine gets wrong, kept out of the graded corpus on purpose |
 | `src/lib/score.ts` | The scorecard: rates, confusion matrix, calibration, per-case breakdown |
 | `src/lib/store.ts` | The reviewer log |
 | `src/app/` | The reviewer UI |
@@ -174,6 +180,37 @@ just read, and the agreement rate would be worth nothing.
 Rows where the reviewer and the label disagree are listed as *disputed*. One of the two is
 wrong, and those are the rows where the corpus learns something.
 
+When two reviewers rule on the same finding, the scorecard also reports pairwise
+reviewer-vs-reviewer agreement — one agreeable reviewer is not agreement, and the
+rate stays null until a second person weighs in.
+
+## Beyond the sixteen packets
+
+The corpus fits in one head. The harness does not have to:
+
+- **Grade an outside system.** Any pipeline — vendor, LLM, script — can report one
+  claim per evidence group as JSON and be graded under the same contract:
+  `npm run grade -- findings.json` (see `scripts/grade.ts` for the shape).
+  Omission grades as dropped, invention as noise; there is no way to dodge the
+  contract by omitting rows.
+- **Grade an LLM adjudicator.** `npm run grade:llm` (needs `GROQ_API_KEY`) runs the
+  same extractor and linker with a language model in place of the rules, saves the
+  raw run to `data/` (gitignored), and grades it next to the reference engine.
+  It takes a few minutes; re-grading a saved run is instant.
+- **Held-out value variants.** `npm run bench:heldout` grades the reference engine
+  on 60 generated packets (6 per case, all values unseen, deterministic seed). Same
+  structures, new names/VINs/addresses/dates/amounts — a generalisation check on
+  values, not on novel structures, and labelled as such. It gates CI like the main
+  bench.
+- **OCR stability.** `npm run ocr` flips a few percent of glyphs the way scanners
+  flip them and reports which findings move. Synthetic noise on synthetic documents —
+  a sensitivity measurement, not a claim about real scans.
+- **One honest failure.** `src/data/failures/FAIL-001` is a clean packet the engine
+  flags, displayed on the method page with the mechanism named and excluded from
+  every grade. A scorecard containing only wins is advertising.
+
+CI runs `typecheck + test + bench + bench:heldout` on every push.
+
 ## Why no numbers in this file
 
 The rates live in the UI and in `npm run bench`, computed by one implementation, and are
@@ -201,13 +238,19 @@ joke.
   the minor-loss ceiling, the material-gap ratio, the near-duplicate similarity floor — are
   my own invention for this exercise. They are not any carrier's real appetite, not taken
   from any filing, and not advice.
+- **Not a hosted product.** Reviewer verdicts write to a local JSON file. On hosts with
+  an ephemeral filesystem the review form disables itself and says so, rather than
+  accepting verdicts it would silently discard.
 
 ## Deliberate omissions
 
-- **No LLM extractor.** The architecture has room for one — facts carry spans and every
-  citation is validated against the source text, which is the guard rail an LLM path needs —
-  but the scorecard would stay on the deterministic extractor either way, and shipping an
-  untested network path would add a failure mode without adding evidence.
+- **LLM adjudication is a separately-graded run, not the pipeline.** `src/lib/llm.ts`
+  swaps a language model in for the rule-based adjudication (same extractor, linker and
+  evidence groups) and grades it with the external adapter. The scorecard stays on the
+  deterministic engine either way: the LLM run is evidence about adjudication behaviour —
+  including how readily a strong model invents contradictions on hard negatives — not a
+  claim about any model. It needs `GROQ_API_KEY`, never runs in tests, and its numbers
+  live in terminal output, never in prose here.
 - **No knowledge graph, no agent framework, no vector store.** A clear scoring pipeline beats
   an impressive opaque one here, because the entire claim is auditability.
 - **No auth, no tenancy, no persistence beyond a JSON file.** It is a bench, not a product.

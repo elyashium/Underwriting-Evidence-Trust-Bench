@@ -6,6 +6,10 @@
 npm install && npm run dev   # http://localhost:3000, no API key / DB / services
 npm test                     # vitest run, whole suite
 npm run bench                # terminal scorecard; exits non-zero on any taxonomy failure (CI gate)
+npm run bench:heldout        # 60 generated packets the rules never saw; also a CI gate
+npm run grade -- <file>      # grade an external system's findings JSON (see scripts/grade.ts)
+npm run grade:llm            # live LLM adjudicator run; needs GROQ_API_KEY, minutes, never in tests/CI
+npm run ocr                  # OCR-noise stability report; informational, always exits 0
 npm run reset                # empty the reviewer log after a demo
 npm run typecheck             # tsc --noEmit
 npm run test:watch            # vitest watch mode
@@ -20,6 +24,9 @@ No lint or formatter config exists; `typecheck + test + bench` is the verificati
 - Pipeline order: `extract.ts` → `normalize.ts` → `link.ts` → `classify.ts` → `score.ts`. Entry point for full run: `src/lib/bench.ts` (`runBench`); CLI wrapper is `scripts/bench.ts`.
 - `src/lib/naive.ts` is the ablation baseline: same extractor + linker, minus domain-aware comparison and cross-document derivation. Keep that parity when editing extraction/linking.
 - `src/data/packets/` holds 16 packets (`PKT-001.ts`…`PKT-016.ts`, re-exported via `index.ts` with `PACKETS` + `TAXONOMY`): 8 `true_conflict` / 8 `hard_negative` across 10 taxonomy cases.
+- `src/data/heldout/generator.ts` builds 60 more (`HO-11`…`HO-106`, 6/case, deterministic seed): same structures, all-new values. Rules are frozen w.r.t. this set — a held-out failure is a generator lie (fix generator) or a genuine gap (report it, never tune rules to it). Gated by `tests/heldout.test.ts` + CI.
+- `src/data/failures/FAIL-001.ts` is a packet the engine gets wrong, deliberately excluded from `PACKETS`. `tests/failures.test.ts` pins all three facts (excluded, still fails, human reading disagrees). If it ever passes, delete the fixture instead of celebrating silently.
+- `EngineId` has three members: `reference` | `naive` | `external`. External is graded-never-analyzed (`src/lib/external.ts` synthesizes analyses from reported findings + reference evidence). `bench.ts` `LocalEngine` covers the two analyzed in-process.
 - Path alias: `@/*` → `./src/*` (`tsconfig.json`). Node >= 20.9.
 
 ## Gotchas that fail tests / bench
@@ -30,4 +37,6 @@ No lint or formatter config exists; `typecheck + test + bench` is the verificati
 - **Normalization folds only where lossless**: `I→1, O→0, Q→0` in VINs are safe (those letters are illegal in VINs); `5/S`, `8/B`, `2/Z`, etc. stay `unresolved`. Street suffixes fold within a family (`Street→ST`), never across (`ST ≠ AVE`); directionals preserved (`1220 N ≠ 1220 S`). Address similarity is report-only, merging is exact-canonical-equality only.
 - **Facts carry char-offset `SourceSpan`s** into `SubmissionDocument.content` (plain text). Spans are computed by the extractor at read time — never hand-author them into fixtures.
 - **Reviewer log** is `data/reviews.json` (gitignored; override via `TRUST_BENCH_REVIEWS`). Missing file = empty, not an error; malformed JSON must throw, never silently overwrite (`store.ts`). `recordReview` requires a reviewer name and `reason.trim().length >= 8`, even on accept. Use `npm run reset`, don't delete files by hand.
+- **Ephemeral hosts can't review.** `isReviewStoreWritable()` probes the filesystem; the server action refuses and the form disables itself with an explanation when writes would vanish (Vercel etc.). Never accept-then-drop a verdict.
+- **LLM runs never touch tests/CI.** `src/lib/llm.ts` (`groqCallModel` reads `GROQ_API_KEY` from env only) is exercised solely by `npm run grade:llm`. Unit tests inject a stub `ModelCall`. Never commit keys, run files (`data/llm-run-*.json`, gitignored), or transcribed LLM numbers into prose.
 - `GUIDELINES` thresholds in `classify.ts` and all packet data are invented for this exercise — not any carrier's appetite, not advice. Repo is deliberately vendor-neutral: keep the disclaimers in `src/app/layout.tsx`, `README.md` (*What this is not*), and `scripts/bench.ts` verbatim; never compare numbers to a commercial product.

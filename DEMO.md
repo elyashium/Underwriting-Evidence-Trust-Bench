@@ -123,3 +123,16 @@ and the corpus is in the repo.
 
 **Reset between demos.** `npm run reset` empties the reviewer log so the human-agreement
 section starts honest.
+
+**Two reviewers beat one.** One person's accept rate measures deference as much as
+judgement. For a serious session, have two people independently rule on the same three
+packets (PKT-003, PKT-009, PKT-015) under different reviewer names — the scorecard then
+reports pairwise reviewer-vs-reviewer agreement, and any disagreement between them is
+the most interesting row in the room.
+
+**The LLM beat, without the wait.** A live `npm run grade:llm` takes minutes (95 model
+calls). Run it once beforehand, then demo the instant replay: `npm run grade --` the
+saved `data/llm-run-*.json`. The punchline lands the same way — a strong model catches
+most conflicts and still invents contradictions on clean packets (check the false alarms
+it raises that the reference engine does not) — and the numbers are byte-identical to
+the live run.
