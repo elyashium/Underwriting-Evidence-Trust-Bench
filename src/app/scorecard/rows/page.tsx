@@ -317,6 +317,7 @@ export default async function RowsPage({
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </section>
 

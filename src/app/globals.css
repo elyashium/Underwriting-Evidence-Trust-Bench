@@ -168,13 +168,30 @@ pre {
     position: fixed;
     left: 0;
     top: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+  }
+
+  .cursor-on .cursor-dot {
+    display: block;
     width: 11px;
     height: 11px;
     border-radius: 50%;
     background: var(--ink);
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0;
+  }
+
+  .cursor-on .cursor-scissors {
+    display: none;
+  }
+
+  /* Scissors along the perforation. */
+  .cursor-on .dot-cursor.scissors .cursor-dot {
+    display: none;
+  }
+
+  .cursor-on .dot-cursor.scissors .cursor-scissors {
+    display: block;
   }
 
   .cursor-on body,
@@ -525,6 +542,18 @@ table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.86rem;
+}
+
+/* Wide tables (scorecard, rows) scroll inside their card column on narrow
+   screens instead of breaking the frame. */
+.table-scroll {
+  overflow-x: auto;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+
+.table-scroll table {
+  min-width: 620px;
 }
 
 th {
@@ -924,10 +953,12 @@ mark.cited {
 }
 
 textarea,
-input[type='text'] {
+input[type='text'],
+input[type='date'],
+select {
   font-family: inherit;
-  font-size: 0.88rem;
-  padding: 9px 12px;
+  font-size: 0.86rem;
+  padding: 8px 10px;
   border: 1.5px solid var(--ink-soft);
   border-radius: 10px;
   background: var(--field);
@@ -936,8 +967,33 @@ input[type='text'] {
   resize: vertical;
 }
 
+/* The try-your-documents form. */
+.doc-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1 1 150px;
+  min-width: 140px;
+}
+
+.field > span {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
 textarea:focus,
-input[type='text']:focus {
+input[type='text']:focus,
+input[type='date']:focus,
+select:focus {
   outline: 2px solid var(--ink);
   outline-offset: 1px;
 }

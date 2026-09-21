@@ -52,6 +52,10 @@ const INTERACTIVE =
  * pointers. It trails the mouse with a fast lerp and doubles in size over
  * anything clickable. Text fields keep their native I-beam — hiding the
  * caret position while someone types a review reason would be hostile.
+ *
+ * Hovering the dotted perforation swaps the dot for scissors: an invitation
+ * to cut along the line. Proximity is measured against the live position of
+ * `.tear`, so it survives scrolling and resizing.
  */
 export function DotCursor() {
   const dot = useRef<HTMLDivElement>(null);
@@ -62,6 +66,27 @@ export function DotCursor() {
     if (!el) return;
 
     document.documentElement.classList.add('cursor-on');
+
+    let tearX: number | null = null;
+    let tearTop = 0;
+    let tearBottom = 0;
+    const measureTear = () => {
+      const tear = document.querySelector('.tear');
+      if (!tear) {
+        tearX = null;
+        return;
+      }
+      const r = tear.getBoundingClientRect();
+      if (r.width === 0) {
+        // Hidden below the mobile breakpoint — no scissors there.
+        tearX = null;
+        return;
+      }
+      tearX = r.left + r.width / 2;
+      tearTop = r.top - 12;
+      tearBottom = r.bottom + 12;
+    };
+    measureTear();
 
     let x = -100;
     let y = -100;
@@ -87,8 +112,16 @@ export function DotCursor() {
         visible = true;
         el!.style.opacity = '1';
       }
+      const nearTear =
+        tearX !== null &&
+        Math.abs(e.clientX - tearX) <= 14 &&
+        e.clientY >= tearTop &&
+        e.clientY <= tearBottom;
+      el!.classList.toggle('scissors', nearTear);
+      if (nearTear) targetScale = 1;
     };
     const hover = (e: MouseEvent) => {
+      if (el!.classList.contains('scissors')) return;
       targetScale =
         e.target instanceof Element && e.target.closest(INTERACTIVE) ? 2 : 1;
     };
@@ -99,15 +132,36 @@ export function DotCursor() {
 
     window.addEventListener('pointermove', move, { passive: true });
     window.addEventListener('mouseover', hover, { passive: true });
+    window.addEventListener('resize', measureTear);
     document.documentElement.addEventListener('mouseleave', leave);
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('pointermove', move);
       window.removeEventListener('mouseover', hover);
+      window.removeEventListener('resize', measureTear);
       document.documentElement.removeEventListener('mouseleave', leave);
       document.documentElement.classList.remove('cursor-on');
     };
   }, []);
 
-  return <div className="dot-cursor" ref={dot} aria-hidden="true" />;
+  return (
+    <div className="dot-cursor" ref={dot} aria-hidden="true">
+      <span className="cursor-dot" />
+      <svg
+        className="cursor-scissors"
+        width="26"
+        height="26"
+        viewBox="0 0 26 26"
+        fill="none"
+        stroke="#16130d"
+        strokeWidth="2"
+        strokeLinecap="round"
+      >
+        <circle cx="6.5" cy="7" r="3" />
+        <circle cx="6.5" cy="19" r="3" />
+        <line x1="9" y1="8.5" x2="21" y2="20" />
+        <line x1="9" y1="17.5" x2="21" y2="6" />
+      </svg>
+    </div>
+  );
 }
