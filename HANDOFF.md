@@ -3,7 +3,7 @@
 **Project:** Underwriting Evidence Trust Bench
 **Location:** `C:\Users\techn\Desktop\pitbit ai`
 **Date:** 21 September 2026
-**Status:** Feature-complete against the brief. **Never executed.** See §1.
+**Status:** Feature-complete against the brief. **First executed 21 Sept 2026 — green on all fronts** (see §1.1).
 
 ---
 
