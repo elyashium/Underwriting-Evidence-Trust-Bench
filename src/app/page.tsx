@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { pct, pctWithCount } from '@/lib/score';
 
 import { bench } from './bench';
-import { Metric, PageHead } from './components/ui';
+import { Metric } from './components/ui';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,18 +21,19 @@ export default function OverviewPage() {
 
   return (
     <>
-      <PageHead
-        eyebrow="Evaluation harness · synthetic corpus"
-        title="Underwriting Evidence Trust Bench"
-      >
-        <p>
+      <header className="hero">
+        <div className="eyebrow">Evaluation harness · synthetic corpus</div>
+        <h1 className="hero-title">
+          The hard part is not catching contradictions. It is not inventing them.
+        </h1>
+        <p className="lede">
           A cross-document reconciliation pipeline for commercial-auto submissions, and
           the harness that grades it. {packets.length} synthetic submission packets, half
           of them containing a real contradiction and half containing something that only
           looks like one, each with a hand-authored label for every finding it is supposed
           to produce.
         </p>
-      </PageHead>
+      </header>
 
       <div className="metrics">
         <Metric
