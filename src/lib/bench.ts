@@ -21,18 +21,21 @@ import type { EngineId, Packet, PacketAnalysis, ReviewDecision } from './types';
  * filesystem in exactly one file (`store.ts`).
  */
 
+/** The two engines analyzed in-process. `external` is graded, never analyzed. */
+export type LocalEngine = Exclude<EngineId, 'external'>;
+
 export interface BenchResult {
   packets: Packet[];
-  analyses: Record<EngineId, PacketAnalysis[]>;
+  analyses: Record<LocalEngine, PacketAnalysis[]>;
   reference: Scorecard;
   baseline: Scorecard;
   comparison: EngineComparison;
 }
 
 /** Analyses are expensive-ish and pure. Compute once per process. */
-let analysisCache: Record<EngineId, PacketAnalysis[]> | null = null;
+let analysisCache: Record<LocalEngine, PacketAnalysis[]> | null = null;
 
-export function analyses(): Record<EngineId, PacketAnalysis[]> {
+export function analyses(): Record<LocalEngine, PacketAnalysis[]> {
   if (!analysisCache) {
     analysisCache = {
       reference: PACKETS.map(analyzePacket),
@@ -42,7 +45,7 @@ export function analyses(): Record<EngineId, PacketAnalysis[]> {
   return analysisCache;
 }
 
-export function analysisFor(packetId: string, engine: EngineId = 'reference'): PacketAnalysis {
+export function analysisFor(packetId: string, engine: LocalEngine = 'reference'): PacketAnalysis {
   const found = analyses()[engine].find((a) => a.packetId === packetId);
   if (!found) throw new Error(`No ${engine} analysis for packet ${packetId}`);
   return found;

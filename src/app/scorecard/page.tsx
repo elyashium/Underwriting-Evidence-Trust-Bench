@@ -493,6 +493,26 @@ function HumanSection({ card }: { card: Scorecard }) {
             quietly scored as disagreement.
           </p>
 
+          {human.decisions > 0 ? (
+            <p className="note">
+              {card.interReviewer.findings === 0 ? (
+                <>
+                  One reviewer so far. Agreement with the pipeline measures deference as
+                  much as judgement — the pairwise reviewer-vs-reviewer rate appears once
+                  a second person rules on the same finding.
+                </>
+              ) : (
+                <>
+                  {card.interReviewer.findings} finding
+                  {card.interReviewer.findings === 1 ? '' : 's'} ruled on by two or more
+                  reviewers, at {pct(card.interReviewer.pairwiseAgreement)} pairwise
+                  agreement ({card.interReviewer.agreedPairs} of{' '}
+                  {card.interReviewer.totalPairs} pairs).
+                </>
+              )}
+            </p>
+          ) : null}
+
           {human.disputed.length > 0 ? (
             <>
               <h3 style={{ marginTop: 18 }}>Disputed</h3>

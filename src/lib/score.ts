@@ -317,6 +317,89 @@ export interface HumanAgreement {
   calibration: Calibration;
 }
 
+export interface ReviewerPairDisagreement {
+  packetId: string;
+  groupKey: string;
+  label: string;
+  pipelineClassification: Classification;
+  verdicts: Array<{ reviewer: string; verdict: ReviewDecision['verdict']; reason: string }>;
+}
+
+export interface InterReviewerAgreement {
+  /** Findings ruled on by two or more distinct reviewers. */
+  findings: number;
+  agreedPairs: number;
+  totalPairs: number;
+  /** agreedPairs / totalPairs — null until two reviewers rule on one finding. */
+  pairwiseAgreement: Rate;
+  /** Findings where at least one reviewer pair disagreed. */
+  disagreements: ReviewerPairDisagreement[];
+}
+
+/**
+ * Agreement *between* reviewers, as distinct from agreement with the pipeline.
+ *
+ * A single reviewer's accept rate measures deference as much as judgement: one
+ * person agreeing with everything tells you they are agreeable. Two reviewers
+ * independently ruling on the same finding tells you whether the finding is
+ * actually decidable from the packet. Until that happens this reports zeros
+ * and nulls rather than a flattering 100%.
+ */
+function scoreInterReviewer(
+  decisions: ReviewDecision[],
+  graded: Map<string, GradedGroup>,
+): InterReviewerAgreement {
+  const byFinding = new Map<string, ReviewDecision[]>();
+  for (const decision of decisions) {
+    const key = `${decision.packetId}::${decision.groupKey}::${decision.engine}`;
+    const list = byFinding.get(key) ?? [];
+    list.push(decision);
+    byFinding.set(key, list);
+  }
+
+  let findings = 0;
+  let agreedPairs = 0;
+  let totalPairs = 0;
+  const disagreements: ReviewerPairDisagreement[] = [];
+
+  for (const list of byFinding.values()) {
+    // One voice per reviewer: a re-review replaces, so keep the latest.
+    const latest = new Map<string, ReviewDecision>();
+    for (const d of list) latest.set(d.reviewer, d);
+    const voices = [...latest.values()];
+    if (voices.length < 2) continue;
+    findings += 1;
+
+    let findingAgreed = true;
+    for (let i = 0; i < voices.length; i += 1) {
+      for (let j = i + 1; j < voices.length; j += 1) {
+        totalPairs += 1;
+        if (voices[i].verdict === voices[j].verdict) agreedPairs += 1;
+        else findingAgreed = false;
+      }
+    }
+    if (!findingAgreed) {
+      const first = voices[0];
+      const row = graded.get(`${first.packetId}::${first.groupKey}`);
+      disagreements.push({
+        packetId: first.packetId,
+        groupKey: first.groupKey,
+        label: row?.label ?? first.groupKey,
+        pipelineClassification: first.pipelineClassification,
+        verdicts: voices.map((v) => ({ reviewer: v.reviewer, verdict: v.verdict, reason: v.reason })),
+      });
+    }
+  }
+
+  return {
+    findings,
+    agreedPairs,
+    totalPairs,
+    pairwiseAgreement: rate(agreedPairs, totalPairs),
+    disagreements,
+  };
+}
+
 function scoreReviews(
   decisions: ReviewDecision[],
   graded: Map<string, GradedGroup>,
@@ -432,6 +515,8 @@ export interface Scorecard {
   byCase: CaseScore[];
   byPacket: PacketScore[];
   human: HumanAgreement;
+  /** Reviewer-vs-reviewer agreement. Empty until two people rule on one finding. */
+  interReviewer: InterReviewerAgreement;
 
   /** Every row every number above was computed from. */
   graded: GradedGroup[];
@@ -474,6 +559,7 @@ function emptyConfusion(): ConfusionMatrix {
 const ENGINE_LABELS: Record<EngineId, string> = {
   reference: 'Reference engine',
   naive: 'Baseline (raw-string comparison, no cross-document rules)',
+  external: 'External system — graded from findings it reported',
 };
 
 export interface ScoreInput {
@@ -618,6 +704,7 @@ export function scoreEngine({
     byCase,
     byPacket,
     human: scoreReviews(decisions, gradedIndex),
+    interReviewer: scoreInterReviewer(decisions, gradedIndex),
 
     graded,
   };

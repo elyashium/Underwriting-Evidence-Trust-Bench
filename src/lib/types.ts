@@ -209,7 +209,12 @@ export interface PacketAnalysis {
   findings: Finding[];
 }
 
-export type EngineId = 'reference' | 'naive';
+export type EngineId = 'reference' | 'naive' | 'external';
+/**
+ * `external` is findings produced outside this repo — a vendor system, an LLM
+ * run, a hand-rolled script — graded by the adapter in `external.ts`. It never
+ * has analyses computed here; the adapter synthesizes them from reported
+ * findings plus this repo's own evidence groups.
 
 // ---------------------------------------------------------------------------
 // Ground truth

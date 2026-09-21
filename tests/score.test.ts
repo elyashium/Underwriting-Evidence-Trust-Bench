@@ -385,6 +385,59 @@ describe('human agreement', () => {
   });
 });
 
+describe('reviewer-vs-reviewer agreement', () => {
+  const two = (
+    groupKey: string,
+    first: { reviewer: string; verdict: 'accept' | 'reject' | 'unresolved' },
+    second: { reviewer: string; verdict: 'accept' | 'reject' | 'unresolved' },
+  ): ReviewDecision[] =>
+    [first, second].map((v) => ({
+      id: `A::${groupKey}::reference::${v.reviewer}`,
+      packetId: 'A',
+      groupKey,
+      engine: 'reference',
+      pipelineClassification: 'benign_variant' as Classification,
+      verdict: v.verdict,
+      reason: 'fixture reasoning, long enough to pass validation',
+      reviewer: v.reviewer,
+      decidedAt: '2026-02-01T00:00:00Z',
+    }));
+
+  it('stays empty until two reviewers rule on one finding', () => {
+    // One agreeable reviewer is not agreement. The null rate must not render
+    // as 0% or 100% anywhere.
+    const solo = card(
+      two('policy::a', { reviewer: 'amy', verdict: 'accept' }, { reviewer: 'amy', verdict: 'accept' }).slice(0, 1),
+    ).interReviewer;
+    expect(solo.findings).toBe(0);
+    expect(solo.totalPairs).toBe(0);
+    expect(solo.pairwiseAgreement).toEqual({ n: 0, of: 0, value: null });
+  });
+
+  it('counts pairwise agreement across shared findings', () => {
+    const inter = card([
+      ...two('policy::a', { reviewer: 'amy', verdict: 'accept' }, { reviewer: 'bo', verdict: 'accept' }),
+      ...two('policy::b', { reviewer: 'amy', verdict: 'accept' }, { reviewer: 'bo', verdict: 'reject' }),
+    ]).interReviewer;
+    expect(inter.findings).toBe(2);
+    expect(inter.totalPairs).toBe(2);
+    expect(inter.agreedPairs).toBe(1);
+    expect(inter.pairwiseAgreement).toEqual({ n: 1, of: 2, value: 0.5 });
+    expect(inter.disagreements.map((d) => d.groupKey)).toEqual(['policy::b']);
+  });
+
+  it('keeps one voice per reviewer on a re-review', () => {
+    // Amy first rejected, then accepted; the stale reject must not linger as
+    // a second voice. (The store enforces this on write; the scorer does not
+    // trust it.)
+    const amyReject = two('policy::a', { reviewer: 'amy', verdict: 'reject' }, { reviewer: 'bo', verdict: 'accept' })[0];
+    const amyAccept = two('policy::a', { reviewer: 'amy', verdict: 'accept' }, { reviewer: 'bo', verdict: 'accept' });
+    const inter = card([amyReject, ...amyAccept]).interReviewer;
+    expect(inter.totalPairs).toBe(1);
+    expect(inter.agreedPairs).toBe(1);
+  });
+});
+
 describe('per-case and per-packet scoring', () => {
   it('refuses to mark a case passed when it has no packets behind it', () => {
     // Without the `declared > 0` guard, every taxonomy case the fixture set does

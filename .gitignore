@@ -8,6 +8,7 @@ coverage/
 # agreement rate shipped in the repo would be a number with nobody behind it.
 data/reviews.json
 data/reviews.json.tmp
+data/llm-run-*.json
 
 .env
 .env.local
