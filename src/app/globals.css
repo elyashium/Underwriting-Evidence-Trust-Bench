@@ -115,7 +115,6 @@ pre {
 }
 
 .rail {
-  border-right: 3px dotted var(--ink);
   padding: 36px 30px 28px;
   display: flex;
   flex-direction: column;
@@ -126,6 +125,66 @@ pre {
   top: 0;
   align-self: start;
   min-height: calc(100vh - 28px);
+}
+
+/* The perforation: drawn by <TearDivider/>, torn upward on scroll. */
+.tear {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  bottom: 0;
+  width: 3px;
+  pointer-events: none;
+}
+
+.tear-line {
+  width: 3px;
+  height: 100%;
+  background-image: radial-gradient(circle, var(--ink) 1.7px, transparent 1.8px);
+  background-size: 3px 12px;
+  background-repeat: repeat-y;
+  position: relative;
+}
+
+.tear-tip {
+  position: absolute;
+  left: 50%;
+  bottom: -7px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--ink);
+  transform: translateX(-50%);
+}
+
+/* The black-dot cursor. Desktop precise pointers only. */
+.dot-cursor {
+  display: none;
+}
+
+@media (pointer: fine) {
+  .cursor-on .dot-cursor {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--ink);
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+  }
+
+  .cursor-on body,
+  .cursor-on a,
+  .cursor-on button,
+  .cursor-on summary,
+  .cursor-on .verdict span,
+  .cursor-on .doc > summary {
+    cursor: none;
+  }
 }
 
 .mark {
@@ -1023,6 +1082,45 @@ button:focus-visible {
   content: '○ ';
 }
 
+/* Numbered how-it-works steps on the overview. */
+.steps {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  border-top: var(--dot-faint);
+}
+
+.steps li {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: var(--dot-faint);
+  align-items: baseline;
+}
+
+.steps .n {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+.steps b {
+  font-weight: 560;
+  letter-spacing: -0.01em;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.steps p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  max-width: 70ch;
+}
+
 /* ------------------------------------------------------------ responsive - */
 
 @media (max-width: 920px) {
@@ -1066,6 +1164,10 @@ button:focus-visible {
   }
 
   .rail-foot {
+    display: none;
+  }
+
+  .tear {
     display: none;
   }
 

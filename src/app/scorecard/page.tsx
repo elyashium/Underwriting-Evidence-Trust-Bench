@@ -121,7 +121,7 @@ export default function ScorecardPage() {
         />
       </div>
 
-      <div className="metrics">
+      <div className="metrics" style={{ marginTop: 14 }}>
         <Metric
           label="Per-decision false-positive rate"
           value={pct(reference.hardNegativeGroupFpr)}
@@ -163,6 +163,7 @@ export default function ScorecardPage() {
           packets and reported nothing that was not authored. There is no partial credit:
           each case names one capability, and the question is whether the engine has it.
         </p>
+        <div className="table-scroll">
         <table style={{ marginTop: 12 }}>
           <thead>
             <tr>
@@ -204,6 +205,7 @@ export default function ScorecardPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </section>
 
       <section className="section" id="ablation">
@@ -215,6 +217,7 @@ export default function ScorecardPage() {
           constant, so the difference between these two columns is attributable to those
           two capabilities rather than to a better parser or a larger model.
         </p>
+        <div className="table-scroll">
         <table style={{ marginTop: 12 }}>
           <thead>
             <tr>
@@ -264,6 +267,7 @@ export default function ScorecardPage() {
             />
           </tbody>
         </table>
+        </div>
 
         <div className="compare" style={{ marginTop: 14 }}>
           <DeltaList
@@ -343,6 +347,7 @@ export default function ScorecardPage() {
           expensive error, and the <em>consistent</em> column off the diagonal is a finding
           the engine dropped.
         </p>
+        <div className="table-scroll">
         <table style={{ marginTop: 12 }}>
           <thead>
             <tr>
@@ -377,6 +382,7 @@ export default function ScorecardPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </section>
 
       <section className="section">
@@ -385,6 +391,7 @@ export default function ScorecardPage() {
           A packet passes when every declared label came back exactly and nothing
           undeclared was reported.
         </p>
+        <div className="table-scroll">
         <table style={{ marginTop: 12 }}>
           <thead>
             <tr>
@@ -427,6 +434,7 @@ export default function ScorecardPage() {
             ))}
           </tbody>
         </table>
+        </div>
         <p className="note">
           <Link href="/scorecard/rows">
             Every graded row, unaggregated ({reference.graded.length} of them) →
@@ -487,6 +495,7 @@ function HumanSection({ card }: { card: Scorecard }) {
                 label is wrong and needs rewriting. These are the rows where the corpus
                 learns something.
               </p>
+              <div className="table-scroll">
               <table style={{ marginTop: 10 }}>
                 <thead>
                   <tr>
@@ -521,6 +530,7 @@ function HumanSection({ card }: { card: Scorecard }) {
                   ))}
                 </tbody>
               </table>
+        </div>
             </>
           ) : null}
         </>

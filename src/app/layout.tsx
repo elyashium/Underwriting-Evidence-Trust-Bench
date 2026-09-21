@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { pct } from '@/lib/score';
 
 import { bench } from './bench';
+import { DotCursor, TearDivider } from './components/chrome';
 import { Nav } from './components/Nav';
 import './globals.css';
 
@@ -43,8 +44,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
+        <DotCursor />
         <div className="frame">
           <aside className="rail">
+            <TearDivider />
             <Link href="/" className="mark" aria-label="Trust Bench home">
               <Mark />
             </Link>

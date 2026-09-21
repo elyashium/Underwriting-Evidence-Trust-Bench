@@ -253,6 +253,7 @@ export default async function RowsPage({
             </p>
           </div>
         ) : (
+          <div className="table-scroll">
           <table>
             <thead>
               <tr>

@@ -63,8 +63,9 @@ export function CalibrationChart({
               y={PAD_TOP}
               width={PLOT_W}
               height={PLOT_H}
-              fill="#fff"
-              stroke="#e2e0db"
+              fill="rgba(255, 253, 246, 0.35)"
+              stroke="#8a8171"
+              strokeWidth="1.5"
             />
 
             {TICKS.map((t) => (
@@ -74,19 +75,21 @@ export function CalibrationChart({
                   y1={PAD_TOP}
                   x2={x(t)}
                   y2={PAD_TOP + PLOT_H}
-                  stroke="#f1efec"
+                  stroke="#a39a85"
+                  strokeDasharray="1.5 5"
                 />
                 <line
                   x1={PAD_LEFT}
                   y1={y(t)}
                   x2={PAD_LEFT + PLOT_W}
                   y2={y(t)}
-                  stroke="#f1efec"
+                  stroke="#a39a85"
+                  strokeDasharray="1.5 5"
                 />
-                <text x={x(t)} y={SIZE - PAD_BOTTOM + 15} fontSize="9" fill="#767f89" textAnchor="middle">
+                <text x={x(t)} y={SIZE - PAD_BOTTOM + 15} fontSize="9" fill="#7d7461" textAnchor="middle">
                   {t.toFixed(2)}
                 </text>
-                <text x={PAD_LEFT - 8} y={y(t) + 3} fontSize="9" fill="#767f89" textAnchor="end">
+                <text x={PAD_LEFT - 8} y={y(t) + 3} fontSize="9" fill="#7d7461" textAnchor="end">
                   {t.toFixed(2)}
                 </text>
               </g>
@@ -98,8 +101,9 @@ export function CalibrationChart({
               y1={y(0)}
               x2={x(1)}
               y2={y(1)}
-              stroke="#b8b4ad"
-              strokeDasharray="4 4"
+              stroke="#16130d"
+              strokeWidth="1.5"
+              strokeDasharray="5 5"
             />
 
             {filled.map((bin) => {
@@ -109,19 +113,20 @@ export function CalibrationChart({
               const over = bin.gap! < 0;
               return (
                 <g key={bin.lower}>
-                  <line x1={cx} y1={cy} x2={cx} y2={y(bin.claimed!)} stroke="#c9c5bd" />
+                  <line x1={cx} y1={cy} x2={cx} y2={y(bin.claimed!)} stroke="#8a8171" strokeDasharray="2 3" />
                   <circle
                     cx={cx}
                     cy={cy}
                     r={r}
-                    fill={over ? 'rgba(179,38,30,0.16)' : 'rgba(31,107,74,0.16)'}
-                    stroke={over ? '#b3261e' : '#1f6b4a'}
+                    fill={over ? 'rgba(161,28,20,0.16)' : 'rgba(30,92,64,0.16)'}
+                    stroke={over ? '#a11c14' : '#1e5c40'}
+                    strokeWidth="2"
                   />
                   <text
                     x={cx}
                     y={cy - r - 4}
                     fontSize="9"
-                    fill="#4a5159"
+                    fill="#4d4638"
                     textAnchor="middle"
                   >
                     n={bin.count}
@@ -134,23 +139,24 @@ export function CalibrationChart({
               x={PAD_LEFT + PLOT_W / 2}
               y={SIZE - 6}
               fontSize="10"
-              fill="#4a5159"
+              fill="#4d4638"
               textAnchor="middle"
             >
-              confidence the pipeline claimed
+              confidence the pipeline claimed →
             </text>
             <text
               x={12}
               y={PAD_TOP + PLOT_H / 2}
               fontSize="10"
-              fill="#4a5159"
+              fill="#4d4638"
               textAnchor="middle"
               transform={`rotate(-90 12 ${PAD_TOP + PLOT_H / 2})`}
             >
-              how often it was right
+              how often it was right →
             </text>
           </svg>
 
+          <div className="table-scroll">
           <table style={{ marginTop: 8 }}>
             <thead>
               <tr>
@@ -181,6 +187,7 @@ export function CalibrationChart({
               ))}
             </tbody>
           </table>
+          </div>
 
           <p className="note">
             ECE {calibration.ece === null ? '—' : calibration.ece.toFixed(3)} over{' '}

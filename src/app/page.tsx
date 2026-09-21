@@ -64,6 +64,113 @@ export default function OverviewPage() {
       </div>
 
       <section className="section">
+        <h2>How it works</h2>
+        <p>
+          Five stages, each one inspectable. Nothing is a black box, because the
+          point of the tool is to check black boxes.
+        </p>
+        <ol className="steps">
+          <li>
+            <span className="n">01</span>
+            <div>
+              <b>Extract</b>
+              <p>
+                Every document is parsed into facts — insured, vehicles, locations,
+                limits, losses — each carrying a character-offset citation into the
+                source text it was read from.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span className="n">02</span>
+            <div>
+              <b>Link</b>
+              <p>
+                Facts are grouped into one evidence graph per entity and field: every
+                value the packet ever asserted for it, in arrival order, with source
+                and timestamp attached.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span className="n">03</span>
+            <div>
+              <b>Classify</b>
+              <p>
+                Each group is adjudicated as a genuine conflict, a temporal
+                supersession, a benign variant, or unresolved — with the named signals
+                that earned the call printed on the finding.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span className="n">04</span>
+            <div>
+              <b>Score</b>
+              <p>
+                Findings are graded against hand-authored labels under a two-way
+                contract: every declared label must be reproduced, and nothing
+                undeclared may be reported. False-positive rate first.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span className="n">05</span>
+            <div>
+              <b>Review</b>
+              <p>
+                A human accepts, rejects, or marks each finding unresolved with a
+                reason. Reviewer agreement is scored separately — confidence is
+                calibrated against people, not just against labels.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section className="section">
+        <h2>Why run this from day one</h2>
+        <p>
+          The corpus here is synthetic, but the contract isn&rsquo;t. The harness
+          grades any packet set you point it at — including your own historical
+          submissions — so a team building document AI gets, from the first week:
+        </p>
+        <ul className="list-plain">
+          <li>
+            <strong>A trust number before anyone relies on the flags.</strong> An eval
+            score over adversarial cases is what lets a founder say &ldquo;our checker
+            is careful&rdquo; with evidence instead of adjectives.
+          </li>
+          <li>
+            <strong>False alarms measured, not vibes.</strong> Hard negatives are
+            first-class test data, so over-flagging shows up as a rate on the
+            scorecard instead of as churned users months later.
+          </li>
+          <li>
+            <strong>Calibration instead of confidence theatre.</strong> The reliability
+            diagram asks whether a 0.9 actually means 90% — the question every
+            enterprise buyer&rsquo;s model-risk team will ask eventually.
+          </li>
+          <li>
+            <strong>Ablation discipline for the roadmap.</strong> Running a simpler
+            baseline beside the reference engine shows which capability earns each
+            point of the score, so effort goes where the delta is.
+          </li>
+          <li>
+            <strong>A reviewer loop that compounds.</strong> Every verdict with a reason
+            becomes agreement data. The log you start on day one is the calibration
+            set you need on day one hundred.
+          </li>
+        </ul>
+        <p className="note">
+          To grade your own packets, add them beside <span className="mono">src/data/packets</span> with
+          ground-truth labels and run <span className="mono">npm run bench</span> — the
+          two-way contract enforces the same honesty on real history as on the
+          synthetic corpus. <Link href="/method">How the pipeline works →</Link>
+        </p>
+      </section>
+
+      <section className="section">
         <h2>Why false positives are the headline</h2>
         <p>
           Recall is the easy half. A checker that reports every difference between any two
