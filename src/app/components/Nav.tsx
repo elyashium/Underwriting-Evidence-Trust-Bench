@@ -14,7 +14,7 @@ export function Nav() {
   const pathname = usePathname();
 
   return (
-    <nav className="nav">
+    <nav className="nav" aria-label="Bench sections">
       {LINKS.map((link) => (
         <Link
           key={link.href}
@@ -23,6 +23,7 @@ export function Nav() {
             link.href === '/' ? pathname === '/' : pathname.startsWith(link.href)
           }
         >
+          <span className="ring" aria-hidden="true" />
           {link.label}
         </Link>
       ))}
