@@ -22,7 +22,7 @@ export default function OverviewPage() {
   return (
     <>
       <header className="hero">
-        <div className="eyebrow">Evaluation harness · synthetic corpus</div>
+        <div className="eyebrow">Synthetic self-test · 16 packets · 0 real data</div>
         <h1 className="hero-title">
           The hard part is not catching contradictions. It is not inventing them.
         </h1>

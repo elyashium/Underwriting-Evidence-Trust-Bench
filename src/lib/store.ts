@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import type { Classification, EngineId, ReviewDecision, ReviewVerdict } from './types';
@@ -32,6 +32,35 @@ const EMPTY: ReviewStoreShape = { version: 1, decisions: [] };
 
 function storePath(override?: string): string {
   return override ?? process.env.TRUST_BENCH_REVIEWS ?? DEFAULT_PATH;
+}
+
+let writableCache: boolean | null = null;
+
+/**
+ * Whether the reviewer log can actually be written on this host.
+ *
+ * Locally the answer is always yes. On serverless hosts (Vercel, and any
+ * read-only filesystem) the answer is no — and a review UI that accepts
+ * verdicts it then fails to store would be silently discarding human
+ * judgement, which is worse than refusing. Callers disable the form and say
+ * so when this returns false. The result is cached per process; tests pass
+ * explicit paths, which bypass the cache.
+ */
+export function isReviewStoreWritable(path?: string): boolean {
+  if (writableCache !== null && path === undefined) return writableCache;
+  let writable = false;
+  try {
+    const file = storePath(path);
+    mkdirSync(dirname(file), { recursive: true });
+    const probe = `${file}.writable-probe`;
+    writeFileSync(probe, '1', 'utf8');
+    unlinkSync(probe);
+    writable = true;
+  } catch {
+    writable = false;
+  }
+  if (path === undefined) writableCache = writable;
+  return writable;
 }
 
 /**

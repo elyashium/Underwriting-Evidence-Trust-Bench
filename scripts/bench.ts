@@ -21,6 +21,8 @@ out();
 out('Underwriting Evidence Trust Bench');
 out('='.repeat(64));
 out(`${packets.length} synthetic packets. Every document is invented.`);
+out('Synthetic self-test: every rate below grades an engine I wrote against');
+out('labels I wrote. Read nothing here as a measurement of a real system.');
 out('This measures two engines I wrote against labels I wrote. It is not a');
 out("benchmark of any commercial product, and no number here was produced by");
 out('running anything against one.');

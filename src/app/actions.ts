@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { ReviewValidationError, recordReview } from '@/lib/store';
+import { ReviewValidationError, isReviewStoreWritable, recordReview } from '@/lib/store';
 import type { Classification, EngineId, ReviewVerdict } from '@/lib/types';
 
 /**
@@ -37,6 +37,17 @@ export async function submitReview(
 
   if (!VERDICTS.includes(verdict)) {
     return { status: 'error', message: 'Pick accept, reject, or unresolved.' };
+  }
+
+  // Serverless hosts have no durable filesystem. Refuse up front rather than
+  // accepting a verdict and then failing to store it.
+  if (!isReviewStoreWritable()) {
+    return {
+      status: 'error',
+      message:
+        'Verdicts are disabled on this host — its filesystem is ephemeral, so ' +
+        'a recorded decision would vanish. Run `npm run dev` locally to review.',
+    };
   }
 
   try {

@@ -42,12 +42,14 @@ export function ReviewForm({
   engine,
   classification,
   existing,
+  writable = true,
 }: {
   packetId: string;
   groupKey: string;
   engine: EngineId;
   classification: Classification;
   existing?: ReviewDecision;
+  writable?: boolean;
 }) {
   const [state, action] = useActionState(submitReview, INITIAL_REVIEW_STATE);
   const [reviewer, setReviewer] = useState('');
@@ -82,6 +84,13 @@ export function ReviewForm({
         <input type="hidden" name="engine" value={engine} />
         <input type="hidden" name="pipelineClassification" value={classification} />
 
+        {!writable ? (
+          <p className="note" style={{ margin: 0 }}>
+            Verdicts are disabled on this host — its filesystem is ephemeral and a
+            recorded decision would vanish. Run the bench locally to review.
+          </p>
+        ) : (
+          <>
         <div className="verdicts">
           {VERDICTS.map((verdict) => (
             <label className="verdict" key={verdict.value} title={verdict.hint}>
@@ -126,6 +135,8 @@ export function ReviewForm({
           ) : null}
           {state.status === 'ok' ? <span className="form-ok">{state.message}</span> : null}
         </div>
+          </>
+        )}
       </form>
     </div>
   );

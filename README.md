@@ -11,6 +11,10 @@ and half of which contain something that only looks like one.
 
 **The headline metric is the false-positive rate on the half that is fine.**
 
+Every rate in this repo is a **synthetic self-test**: one engine I wrote, graded
+against labels I wrote, on sixteen packets I wrote. Nothing here measures a real
+system, a real book of business, or anyone else's product.
+
 ---
 
 ## Run it

@@ -29,6 +29,7 @@ export function FindingCard({
   why,
   existing,
   reviewable = true,
+  writable = true,
 }: {
   finding: Finding;
   titles: DocumentTitles;
@@ -39,6 +40,7 @@ export function FindingCard({
   why?: string;
   existing?: ReviewDecision;
   reviewable?: boolean;
+  writable?: boolean;
 }) {
   return (
     <article className={`finding finding-${finding.classification}`}>
@@ -123,6 +125,7 @@ export function FindingCard({
           engine={engine}
           classification={finding.classification}
           existing={existing}
+          writable={writable}
         />
       ) : null}
     </article>

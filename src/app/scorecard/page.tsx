@@ -6,6 +6,7 @@ import type { Classification } from '@/lib/types';
 import { bench } from '../bench';
 import { CalibrationChart } from '../components/CalibrationChart';
 import { Badge, Bucket, Metric, PageHead, classificationLabel } from '../components/ui';
+import { isReviewStoreWritable } from '@/lib/store';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,7 +84,7 @@ export default function ScorecardPage() {
   return (
     <>
       <PageHead
-        eyebrow={`${reference.engineLabel} · ${reference.packets} synthetic packets · ${reference.groupsEvaluated} graded decisions`}
+        eyebrow={`Synthetic self-test · ${reference.packets} packets · ${reference.groupsEvaluated} graded decisions`}
         title="Scorecard"
       >
         <p>
@@ -458,6 +459,12 @@ function HumanSection({ card }: { card: Scorecard }) {
             right, and the numbers here start filling in. They start empty on purpose:
             an agreement rate with nobody behind it would be the most misleading figure on
             the page.
+            {!isReviewStoreWritable() ? (
+              <>
+                {' '}This host cannot record verdicts — its filesystem is ephemeral.
+                Run the bench locally to review.
+              </>
+            ) : null}
           </p>
         </div>
       ) : (

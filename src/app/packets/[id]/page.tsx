@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { PACKETS, getPacket, getTaxonomyCase } from '@/data/packets';
 import { analysisFor } from '@/lib/bench';
 import { documentTitles } from '@/lib/classify';
-import { decisionsForPacket } from '@/lib/store';
+import { decisionsForPacket, isReviewStoreWritable } from '@/lib/store';
 import type { Classification } from '@/lib/types';
 
 import { FindingCard } from '../../components/FindingCard';
@@ -105,6 +105,7 @@ export default async function PacketPage({
                   : undefined
               }
               existing={decisionFor(finding.groupKey)}
+              writable={isReviewStoreWritable()}
             />
           ))}
         </div>
