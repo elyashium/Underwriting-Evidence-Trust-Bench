@@ -808,17 +808,21 @@ export function summaryLines(card: Scorecard): string[] {
 
 export function comparisonLines(comparison: EngineComparison): string[] {
   const { reference, baseline } = comparison;
+  // The second column is usually the naive baseline, but external grading
+  // reuses this comparison — label the column honestly either way.
+  const other = baseline.engine === 'naive' ? 'baseline' : 'external';
   const lines = [
-    'Reference engine vs baseline, same documents, same extractor, same linking.',
-    'The baseline is my own construction and is not a model of any real product.',
-    '',
-    `  false positives on clean packets   baseline ${pctWithCount(
+    `Reference engine vs ${other}, same documents, same extractor, same linking.`,
+    ...(baseline.engine === 'naive'
+      ? ['The baseline is my own construction and is not a model of any real product.', '']
+      : ['The external column grades findings reported outside this repo, against the same labels.', '']),
+    `  false positives on clean packets   ${other} ${pctWithCount(
       baseline.hardNegativePacketFpr,
     )}   reference ${pctWithCount(reference.hardNegativePacketFpr)}`,
-    `  real conflicts caught              baseline ${pctWithCount(
+    `  real conflicts caught              ${other} ${pctWithCount(
       baseline.conflictRecall,
     )}   reference ${pctWithCount(reference.conflictRecall)}`,
-    `  review load per packet             baseline ${baseline.reviewLoad.toFixed(
+    `  review load per packet             ${other} ${baseline.reviewLoad.toFixed(
       1,
     )}   reference ${reference.reviewLoad.toFixed(1)}`,
     '',
@@ -830,7 +834,7 @@ export function comparisonLines(comparison: EngineComparison): string[] {
     lines.push('');
   }
   if (comparison.onlyBaselineCaught.length) {
-    lines.push('  caught only by the baseline');
+    lines.push(`  caught only by the ${other}`);
     for (const item of comparison.onlyBaselineCaught) lines.push(`    + ${item}`);
     lines.push('');
   }
@@ -840,7 +844,7 @@ export function comparisonLines(comparison: EngineComparison): string[] {
     lines.push('');
   }
   if (comparison.falseConflictsIntroduced.length) {
-    lines.push('  false alarms the reference engine raises and the baseline does not');
+    lines.push(`  false alarms the reference engine raises and the ${other} does not`);
     for (const item of comparison.falseConflictsIntroduced) lines.push(`    ! ${item}`);
     lines.push('');
   }
