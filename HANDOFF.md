@@ -9,16 +9,34 @@
 
 ## 1. Read this first
 
-**No command in this repo has ever been run.** Not `npm install`, not `npm test`, not
+**At build time no command in this repo had ever been run.** Not `npm install`, not `npm test`, not
 `npm run dev`, not `tsc`. The shell was unavailable for the entire build (the permission
 classifier that gates Bash was down and stayed down), so every file here was written and
-cross-checked by reading, not by running.
+cross-checked by reading, not by running. That changed on 21 Sept 2026 — see §1.1.
 
 Everything was verified statically — imports resolved against real exports, prop types
 checked against real component signatures, test assertions checked line by line against the
 implementations they cover, and all hand-written prose cross-checked against the actual
 packet data. That is a meaningfully weaker guarantee than a green test run, and you should
 treat the first execution as a real step, not a formality.
+
+### 1.1 First execution — 21 Sept 2026, all green
+
+A follow-up session ran the full chain; none of the §6.1 fears materialised.
+
+- `npm install` — clean (73 packages). `npm run typecheck` — clean.
+- `npm test` — **215/215 pass** across all 5 files on the first run.
+- `npm run bench` — exit 0. Reference: FPR 0.0% on clean packets, conflict
+  recall 100% (8/8), 53/53 labels reproduced, all 10 taxonomy cases pass.
+  Baseline contrast as designed (packet-level FPR 100%, recall 12.5%).
+- `npm run build` — clean, all 7 routes.
+- Server smoke test — 200s on `/`, `/scorecard`, `/packets/PKT-003`,
+  `/packets/PKT-009`, with conflict/supersession markers present in the HTML.
+- Reviewer loop — recorded one verdict via `recordReview` (human.decisions 1,
+  accepted 1, disputed 0 in `runBench`), then `npm run reset` cleared it.
+  The log is empty again. No source changes were needed.
+
+The original first-run instructions are kept below for any fresh clone.
 
 **Do this first:**
 
