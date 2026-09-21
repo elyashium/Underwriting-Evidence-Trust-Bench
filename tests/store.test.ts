@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -8,6 +8,7 @@ import {
   ReviewValidationError,
   clearReviews,
   decisionsForPacket,
+  isReviewStoreWritable,
   readDecisions,
   recordReview,
   type RecordReviewInput,
@@ -164,5 +165,23 @@ describe('querying and resetting', () => {
 
     expect(readDecisions(file)).toEqual([]);
     expect(JSON.parse(readFileSync(file, 'utf8')).version).toBe(1);
+  });
+});
+
+describe('writability probe', () => {
+  it('reports a normal directory as writable', () => {
+    expect(isReviewStoreWritable(file)).toBe(true);
+  });
+
+  it('reports an impossible path as not writable, without throwing', () => {
+    // A file standing where a directory should be: mkdirSync cannot proceed.
+    const blocker = join(dir, 'blocker.json');
+    writeFileSync(blocker, '{}', 'utf8');
+    expect(isReviewStoreWritable(join(blocker, 'reviews.json'))).toBe(false);
+  });
+
+  it('leaves no probe file behind', () => {
+    isReviewStoreWritable(file);
+    expect(readdirSync(dir)).toEqual([]);
   });
 });
